@@ -36,7 +36,8 @@ class Game
       puts line
     end
     p"#{@row}, #{@col}"
-    p "#{@turn} turn"
+    p "#{@turn}'s turn"
+    p  "#{@turn} in Check?: #{in_check?(@turn)}"
   end
   
   def cursor 
@@ -91,9 +92,7 @@ class Game
       action = cursor
       case action
       when "R"
-        in_check?(@turn)
         moves_list = @gameboard.square(@col, @row).moves
-        
         if moves_list.empty?
           puts "Sorry no valid moves, Press Enter to Continue"
           gets
@@ -124,13 +123,15 @@ class Game
         end
       end
     end
+    dup_board
   end
   
   def valid_moves
     val_moves = []
     pieces = get_pieces(@turn)
     pieces.each do |piece|
-      val_moves << piece.moves.select{|move| is_valid?(dup_board, piece, move)}
+      duplicate = dup_board
+      val_moves << piece.moves.select{|move| is_valid?(duplicate, piece, move)}
       return true if val_moves.count > 0
     end
     false
@@ -138,7 +139,7 @@ class Game
   
   def is_valid?(board_name, piece, move)
     move(board_name, piece, move)
-    in_check?(piece.color)
+    !in_check?(piece.color)
   end
   
   def move(g_board, piece, loc)
@@ -168,10 +169,7 @@ class Game
     color == "black" ? enemy = "white" : enemy = "black"
     king_pos = king_positions[color]
     pieces = get_pieces(enemy)
-    if pieces.any? {|piece| piece.moves.include?(king_pos)}
-      puts "#{color} is in check, press enter"
-      gets
-    end
+    return (pieces.any? {|piece| piece.moves.include?(king_pos)})
   end
 end
 

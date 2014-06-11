@@ -106,11 +106,8 @@ class Knight < Piece   #also a horse...........☐☐
   def moves
     dxdy = (-2..2).to_a.product((-2..2).to_a)
     dxdy = dxdy.select {|pos| pos[0].abs + pos[1].abs == 3} 
-    p dxdy
     possible_positions = dxdy.map {|pos| [pos[0] + @pos[0], pos[1] + @pos[1]]}
     move_list = possible_positions.select{|tile| open?(tile)}
-    
-    p move_list
   end
 end
 
