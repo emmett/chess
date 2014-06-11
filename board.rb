@@ -7,6 +7,7 @@ class Board
 
   def board_setup
     @board               = Array.new(9) {Array.new(9)}
+
     @board[0]            = [nil, "1", "2", "3", "4", "5", "6", "7", "8"]
     @board[1]            = [nil, 
       Rook.new(self,   [1, 1], "white"), 
@@ -34,6 +35,7 @@ class Board
           @board[7][col] = Pawn.new(self, [7, col], "black")
           @board[col][0] = (col).to_s + " " 
         end
+        p @board[2][8]
       end
   
       def square(x, y)

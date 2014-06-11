@@ -1,8 +1,8 @@
 # -*- coding: UTF-8 -*-
 
 class Piece 
-  DIAGONALS = [[1,1],[1, -1], [-1,1], [-1, -1]]
-  STRAIGHTS = [[1,0], [0, 1], [-1, 0], [0, -1]]
+  DIAGONALS = [[1, 1],[1, -1], [-1, 1], [-1, -1]]
+  STRAIGHTS = [[1, 0], [0, 1], [-1, 0], [0, -1]]
   VALID_SQUARES = (1..8).to_a.product((1..8).to_a) 
   
   attr_reader :char, :color
@@ -35,7 +35,7 @@ class Piece
   
   def moves
     possible_moves = []
-    self.move_dirs.each do |delta|
+    move_dirs.each do |delta|
       new_loc = [@pos[0] + delta[0], @pos[1] + delta[1]]
       while on_board?(new_loc) && open?(new_loc)
         possible_moves << new_loc
@@ -88,8 +88,11 @@ class Knight < Piece   #also a horse...........☐☐
   def moves
       dxdy = (-2..2).to_a.product((-2..2).to_a)
       dxdy = dxdy.select {|pos| pos[0].abs + pos[1].abs == 3} 
-      possible_positions = dxdy.map {|pos| [pos[0] + @pos[0], pos[1] + @pos[1]]} 
-      possible_positions.select{|tile| capture?(tile) || open?(tile)}
+      p dxdy
+      possible_positions = dxdy.map {|pos| [pos[0] + @pos[0], pos[1] + @pos[1]]}
+      move_list = possible_positions.select{|tile| open?(tile)}
+      
+      p move_list
     end
 end
 
@@ -98,7 +101,7 @@ class Pawn < Piece
     possible_moves = []
     if color == "black"   
       if pos[0] == 7 
-        possible_moves << [pos[0] - 1, pos[1]] + [pos[0] - 2, pos[1]]
+        possible_moves << [[pos[0] - 1, pos[1]]] << [pos[0] - 2, pos[1]]
       else
         possible_moves << [pos[0] - 1, pos[1]]
       end
@@ -111,7 +114,7 @@ class Pawn < Piece
       end
     else  
       if pos[0] == 2 
-        possible_moves << [pos[0] + 1, pos[1]] + [pos[0] + 2, pos[1]]
+        possible_moves << [[pos[0] + 1, pos[1]]] << [pos[0] + 2, pos[1]]
       else
         possible_moves << [pos[0] + 1, pos[1]]
       end

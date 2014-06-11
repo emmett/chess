@@ -61,7 +61,12 @@ class Game
     when "f"
       return "F"
     when "\r"
-      return "R" unless @gameboard.square(@x, @y).moves.empty?
+      if @gameboard.square(@x, @y) == []
+        puts "Sorry Empty Square, Press Enter to Continue"
+        gets
+        cursor
+      end
+      return "R" 
       cursor
     when "\e"
       return "c"
@@ -71,6 +76,8 @@ class Game
   
   
   def won?
+    # board in check
+    # no valid moves
     false
   end
   
@@ -81,29 +88,37 @@ class Game
       when "F"
         puts "move char"
       when "R"
-        p "please select your end coordinates"
-        p @gameboard.square(@x, @y).moves
-        loc = [0,0]
-        until @gameboard.square(@x, @y).moves.include?([loc[0], loc[1]])
+        debugger
+        moves_list = @gameboard.square(@x, @y).moves
+        if moves_list.empty?
+          puts "Sorry Empty Square, Press Enter to Continue"
+          gets
+          cursor
+        end
+          p "please select your end coordinates"
+          p moves_list
+          loc = [0,0]
+        until moves_list.include?([loc[0], loc[1]])
           display
           p "please select your end coordinates"
-          p @gameboard.square(@x, @y).moves
-          loc = gets.chomp.reverse
+          p moves_list
+          loc = gets.chomp
+          loc = loc.split(",").map { |s| s.to_i }
+          p loc
         end
-        swap_positions(@gameboard.square(@x, @y), loc)
+        swap_positions(@gameboard.square(@x, @y), loc.reverse)
       when "c"
         return         
       end      
     end
   end
   
-  def swap_positions(piece1, loc)
-    @gameboard.board[loc[0]][loc[1]], piece1.pos = piece1, loc
-    piece1 = []
+  def swap_positions(piece, loc)
+    dup_piece = piece.class.new(@gameboard, [@x, @y], piece.color)
+    @gameboard.board[loc[1]][loc[0]] = dup_piece
+    dup_piece.pos = [loc[1],loc[0]]
+    @gameboard.board[@y][@x] = []
     puts "swapped"
   end
   
-  # def capture(piece1, piece2)
-#     piece1, piece2, piece1.pos = piece2, [], piece2.pos
-#   end
 end
