@@ -1,13 +1,13 @@
 require 'debugger'
 class Board
-  attr_reader :board
+  attr_accessor :board
   def initialize
     board_setup
   end
 
   def board_setup
     @board               = Array.new(9) {Array.new(9)}
-    @board[0]            = [nil, "1 ", "2 ", "3 ", "4 ", "5 ", "6 ", "7 ", "8 "]
+    @board[0]            = [nil, "1", "2", "3", "4", "5", "6", "7", "8"]
     @board[1]            = [nil, 
       Rook.new(self,   [1, 1], "white"), 
       Knight.new(self, [1, 2], "white"), 
@@ -18,15 +18,7 @@ class Board
       Knight.new(self, [1, 7], "white"), 
       Rook.new(self,   [1, 8], "white")]
       for row in (3..6) do 
-        @board[row]= [
-          Tile.new(self, [row, 1], "black"), 
-          Tile.new(self, [row, 2], "black"), 
-          Tile.new(self, [row, 3], "black"), 
-          Tile.new(self, [row, 4], "black"), 
-          Tile.new(self, [row, 5], "black"), 
-          Tile.new(self, [row, 6], "black"), 
-          Tile.new(self, [row, 7], "black"), 
-          Tile.new(self, [row, 8], "black")]
+        @board[row]= Array.new(9) {[]}
       end
       @board[8]          = [nil, 
         Rook.new(self,   [8, 1], "black"), 
