@@ -10,13 +10,9 @@ class Piece
   
   def initialize(board, pos, color)
     @board, @pos, @color = board, pos, color
-    @char = CHARACTERS[@color][self.class]
+
   end
-  
-  def to_s
-    @char
-  end
-  
+    
   def empty?
     false
   end
@@ -56,6 +52,9 @@ class Bishop < Piece
   def move_dirs
     Piece::DIAGONALS
   end
+  def to_s
+    self.color == "white" ? "♗": "♝"
+  end
 end
   
 
@@ -64,6 +63,10 @@ class King < Piece
     Piece::DIAGONALS + Piece::STRAIGHTS
   end
   
+  def to_s
+    self.color == "white" ? "♔": "♚"
+  end
+
   def moves
     possible_moves = []
     self.move_dirs.each do |delta|
@@ -79,6 +82,9 @@ class Queen < Piece
   def move_dirs
     Piece::DIAGONALS + Piece::STRAIGHTS
   end
+  def to_s
+    self.color == "white" ? "♕": "♛"
+  end
 end
 
 
@@ -86,9 +92,17 @@ class Rook < Piece
   def move_dirs
     Piece::STRAIGHTS
   end
+  
+  def to_s
+    self.color == "white" ? "♖": "♜"
+  end
 end
 
 class Knight < Piece   #also a horse...........☐☐
+  def to_s
+    self.color == "white" ? "♘": "♞"
+  end
+  
   def moves
       dxdy = (-2..2).to_a.product((-2..2).to_a)
       dxdy = dxdy.select {|pos| pos[0].abs + pos[1].abs == 3} 
@@ -101,44 +115,28 @@ class Knight < Piece   #also a horse...........☐☐
 end
 
 class Pawn < Piece
+  def to_s
+    self.color == "white" ? "♙": "♟"
+  end
+
   def moves
     row = pos[0]
     col = pos[1]
     possible_moves = []
-    if color == "black"   
-      if pos[0] == 7 
-        possible_moves << [row - 1, col] 
-        possible_moves << [row - 2, col]
-      else
-        possible_moves << [row - 1, col]
-      end
-      possible_moves = possible_moves.select {|m| on_board?(m) && open?(m)}
-      captures = [[row - 1, col + 1],[row - 1, col - 1]].select{|pos| capture?(pos)}
-    else  
-      if row == 2 
-        possible_moves << [row + 1, col] 
-        possible_moves << [row + 2, col]
-      else
-        possible_moves << [row + 1, col]
-      end
-      possible_moves = possible_moves.select {|m| on_board?(m) && open?(m)}
-      captures = [[row + 1, col + 1],[row + 1, col - 1]].select{|pos| capture?(pos)}
+    
+    if color == "black"
+      hasnt_moved = row == 7
+      direction = -1
+    else
+      hasnt_moved = row == 2
+      direction = 1
     end
-    possible_moves + captures
+    
+    possible_moves << [row + (2 * direction), col] if hasnt_moved
+    possible_moves << [row + direction, col]
+    
+    maybe_captures = [[row + direction, col + 1],[row + direction, col - 1]]
+    
+    possible_moves += maybe_captures.select{ |pos| capture?(pos) }
   end
 end
-CHARACTERS = { "black" => { 
-    King => "♚",
-    Queen => "♛",
-    Rook => "♜",
-    Bishop => "♝",
-    Knight => "♞",
-    Pawn => "♟"},
-  "white" => {
-    King => "♔",
-    Queen => "♕",
-    Rook => "♖",
-    Bishop => "♗",
-    Knight => "♘",
-    Pawn => "♙"}
-}

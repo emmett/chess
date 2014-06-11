@@ -24,7 +24,7 @@ class Game
         elsif contents.empty?
           space = "☐"
         else
-          space = contents.char
+          space = contents.to_s
         end
         if x1 == @col && y1 == @row 
           space = " " + space
