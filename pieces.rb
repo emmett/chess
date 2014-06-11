@@ -72,7 +72,6 @@ class King < Piece
     self.move_dirs.each do |delta|
       new_loc = [@pos[0] + delta[0], @pos[1] + delta[1]]
       possible_moves << new_loc if on_board?(new_loc) && (open?(new_loc) || capture?(new_loc))
-      possible_moves = possible_moves.select {|move| valid_move?(move)}
     end
     return possible_moves
   end

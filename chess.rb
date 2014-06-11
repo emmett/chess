@@ -60,8 +60,6 @@ class Game
       @col == 8 ? @col = 1 : @col += 1 
     when "\e[A"
       @row == 1 ? @row = 8 : @row -= 1 
-    when "f"
-      return "F"
     when "\r"
       if @gameboard.square(@col, @row) == []
         puts "Sorry Empty Square, Press Enter to Continue"
@@ -92,11 +90,8 @@ class Game
     until won?
       action = cursor
       case action
-      when "F"
-        puts "move char"
       when "R"
-        in_check?
-        #valid moves?
+        in_check?(@turn)
         moves_list = @gameboard.square(@col, @row).moves
         
         if moves_list.empty?
@@ -132,15 +127,13 @@ class Game
   end
   
   def valid_moves
+    val_moves = []
     pieces = get_pieces(@turn)
     pieces.each do |piece|
-      piece.moves.select{|move| is_valid?(dup_board, piece, move)}
-        
-        
-        #making move on dup board 
-        #returning if their is at least one valid move
+      val_moves << piece.moves.select{|move| is_valid?(dup_board, piece, move)}
+      return true if val_moves.count > 0
     end
-    #calls moves on every piece, and selects those which do not cause check
+    false
   end
   
   def is_valid?(board_name, piece, move)
@@ -153,7 +146,6 @@ class Game
     g_board.board[loc[1]][loc[0]] = dup_piece
     dup_piece.pos = [loc[1],loc[0]]
     g_board.board[@row][@col] = []
-    puts "swapped"
     @turn == "black" ? @turn = "white" : @turn = "black"
   end
   
@@ -175,8 +167,6 @@ class Game
   def in_check?(color)
     color == "black" ? enemy = "white" : enemy = "black"
     king_pos = king_positions[color]
-    p king_pos
-    puts "checking for check"
     pieces = get_pieces(enemy)
     if pieces.any? {|piece| piece.moves.include?(king_pos)}
       puts "#{color} is in check, press enter"
