@@ -1,13 +1,12 @@
 require 'debugger'
 class Board
   attr_accessor :board
-  def initialize
-    board_setup
+  def initialize(new_game = false)
+    @board               = Array.new(9) {Array.new(9)}
+    board_setup unless new_game 
   end
 
   def board_setup
-    @board               = Array.new(9) {Array.new(9)}
-
     @board[0]            = [nil, "1", "2", "3", "4", "5", "6", "7", "8"]
     @board[1]            = [nil, 
       Rook.new(self,   [1, 1], "white"), 

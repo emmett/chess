@@ -72,6 +72,7 @@ class King < Piece
     self.move_dirs.each do |delta|
       new_loc = [@pos[0] + delta[0], @pos[1] + delta[1]]
       possible_moves << new_loc if on_board?(new_loc) && (open?(new_loc) || capture?(new_loc))
+      possible_moves = possible_moves.select {|move| valid_move?(move)}
     end
     return possible_moves
   end
@@ -104,14 +105,14 @@ class Knight < Piece   #also a horse...........☐☐
   end
   
   def moves
-      dxdy = (-2..2).to_a.product((-2..2).to_a)
-      dxdy = dxdy.select {|pos| pos[0].abs + pos[1].abs == 3} 
-      p dxdy
-      possible_positions = dxdy.map {|pos| [pos[0] + @pos[0], pos[1] + @pos[1]]}
-      move_list = possible_positions.select{|tile| open?(tile)}
-      
-      p move_list
-    end
+    dxdy = (-2..2).to_a.product((-2..2).to_a)
+    dxdy = dxdy.select {|pos| pos[0].abs + pos[1].abs == 3} 
+    p dxdy
+    possible_positions = dxdy.map {|pos| [pos[0] + @pos[0], pos[1] + @pos[1]]}
+    move_list = possible_positions.select{|tile| open?(tile)}
+    
+    p move_list
+  end
 end
 
 class Pawn < Piece
