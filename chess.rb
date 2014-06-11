@@ -7,8 +7,9 @@ require 'debugger'
 class Game
   def initialize
     @gameboard = Board.new
-    @x = 1
-    @y = 1
+    @col = 1
+    @row = 1
+    @turn = "white"
     play
   end
     
@@ -25,7 +26,7 @@ class Game
         else
           space = contents.char
         end
-        if x1 == @x && y1 == @y 
+        if x1 == @col && y1 == @row 
           space = " " + space
         else
           space = space + " " 
@@ -34,7 +35,8 @@ class Game
       end  
       puts line
     end
-    p"#{@x}, #{@y}"
+    p"#{@row}, #{@col}"
+    p @turn
   end
   
   def cursor 
@@ -51,23 +53,28 @@ class Game
     end
     case input
     when "\e[D"
-      @x == 1 ? @x = 8 : @x -= 1 
+      @col == 1 ? @col = 8 : @col -= 1 
     when "\e[B"
-      @y == 8 ? @y = 1 : @y += 1 
+      @row == 8 ? @row = 1 : @row += 1 
     when "\e[C"
-      @x == 8 ? @x = 1 : @x += 1 
+      @col == 8 ? @col = 1 : @col += 1 
     when "\e[A"
-      @y == 1 ? @y = 8 : @y -= 1 
+      @row == 1 ? @row = 8 : @row -= 1 
     when "f"
       return "F"
     when "\r"
-      if @gameboard.square(@x, @y) == []
+      if @gameboard.square(@col, @row) == []
         puts "Sorry Empty Square, Press Enter to Continue"
+        gets    
+        play
+      elsif @gameboard.square(@col, @row).color == @turn
+        return "R" 
+        play
+      else
+        puts "Not your turn, Please press enter to continue"
         gets
-        cursor
+        play
       end
-      return "R" 
-      cursor
     when "\e"
       return "c"
     end
@@ -88,25 +95,22 @@ class Game
       when "F"
         puts "move char"
       when "R"
-        debugger
-        moves_list = @gameboard.square(@x, @y).moves
+        moves_list = @gameboard.square(@col, @row).moves
         if moves_list.empty?
-          puts "Sorry Empty Square, Press Enter to Continue"
+          puts "Sorry no valid moves, Press Enter to Continue"
           gets
-          cursor
+          play
         end
-          p "please select your end coordinates"
-          p moves_list
           loc = [0,0]
         until moves_list.include?([loc[0], loc[1]])
           display
-          p "please select your end coordinates"
+          p "Please select your end coordinates"
           p moves_list
           loc = gets.chomp
           loc = loc.split(",").map { |s| s.to_i }
           p loc
         end
-        swap_positions(@gameboard.square(@x, @y), loc.reverse)
+        swap_positions(@gameboard.square(@col, @row), loc.reverse)
       when "c"
         return         
       end      
@@ -114,11 +118,12 @@ class Game
   end
   
   def swap_positions(piece, loc)
-    dup_piece = piece.class.new(@gameboard, [@x, @y], piece.color)
+    dup_piece = piece.class.new(@gameboard, [@col, @row], piece.color)
     @gameboard.board[loc[1]][loc[0]] = dup_piece
     dup_piece.pos = [loc[1],loc[0]]
-    @gameboard.board[@y][@x] = []
+    @gameboard.board[@row][@col] = []
     puts "swapped"
+    @turn == "black" ? @turn = "white" : @turn = "black"
   end
   
 end

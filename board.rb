@@ -38,8 +38,8 @@ class Board
         p @board[2][8]
       end
   
-      def square(x, y)
-        @board[y][x]
+      def square(col, row)
+        @board[row][col]
       end
 
     end

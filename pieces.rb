@@ -102,35 +102,29 @@ end
 
 class Pawn < Piece
   def moves
+    row = pos[0]
+    col = pos[1]
     possible_moves = []
     if color == "black"   
       if pos[0] == 7 
-        possible_moves << [[pos[0] - 1, pos[1]]] << [pos[0] - 2, pos[1]]
+        possible_moves << [row - 1, col] 
+        possible_moves << [row - 2, col]
       else
-        possible_moves << [pos[0] - 1, pos[1]]
+        possible_moves << [row - 1, col]
       end
       possible_moves = possible_moves.select {|m| on_board?(m) && open?(m)}
-      if capture?([pos[0] - 1, pos[1] + 1])
-          possible_moves << [pos[0] - 1, pos[1] + 1]
-      end
-      if capture?([pos[0] - 1, pos[1] - 1])
-        possible_moves << [pos[0] - 1, pos[1] - 1]
-      end
+      captures = [[row - 1, col + 1],[row - 1, col - 1]].select{|pos| capture?(pos)}
     else  
-      if pos[0] == 2 
-        possible_moves << [[pos[0] + 1, pos[1]]] << [pos[0] + 2, pos[1]]
+      if row == 2 
+        possible_moves << [row + 1, col] 
+        possible_moves << [row + 2, col]
       else
-        possible_moves << [pos[0] + 1, pos[1]]
+        possible_moves << [row + 1, col]
       end
       possible_moves = possible_moves.select {|m| on_board?(m) && open?(m)}
-      if capture?([pos[0] + 1, pos[1] + 1])
-          possible_moves <<[pos[0] + 1, pos[1] + 1]
-      end
-      if capture? ([pos[0] + 1, pos[1] - 1])
-        possible_moves << [pos[0] + 1, pos[1] - 1]
-      end
+      captures = [[row + 1, col + 1],[row + 1, col - 1]].select{|pos| capture?(pos)}
     end
-    possible_moves
+    possible_moves + captures
   end
 end
 CHARACTERS = { "black" => { 
