@@ -13,6 +13,10 @@ class Piece
     @char = CHARACTERS[@color][self.class]
   end
   
+  def to_s
+    @char
+  end
+  
   def empty?
     false
   end
