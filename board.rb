@@ -48,8 +48,9 @@ class Board
     dup_board
   end
   
-  def move(start, end_pos)#these are arrays are in ROW,COL format
+  def move(start, end_pos, color)
     piece_to_move = @board[start[0]][start[1]]
+    raise "not your piece" unless piece_to_move.color == color
     raise "not a piece" unless piece_to_move.is_a? Piece
     raise "not valid" unless piece_to_move.valid_moves.include?(end_pos)
     move!(start, end_pos)

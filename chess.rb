@@ -9,26 +9,35 @@ class Game
     @gameboard = Board.new()
     @col = 1
     @row = 1
-    @turn = "white"
     play
   end
   
   def play
+    turn = "white"
     loop do
       @gameboard.display
-      start_pos = get_input("start")
-      end_pos = get_input('end')
-      @gameboard.move(start_pos, end_pos)
+      start_pos = get_input("start", turn)
+      end_pos = get_input("end", turn)
+      @gameboard.move(start_pos, end_pos, turn)
+      turn == "white" ? turn = "black" : turn = "white"
     end 
   end
   
-  def get_input(type)
-    puts "please enter #{type} (x,y)"
-    pos_string = gets.chomp
-    pos_string.split(',').reverse.map(&:to_i)
+  def get_input(type, turn)
+      puts "#{turn} player's turn"
+      puts "please enter #{type} (x,y)"
+      pos_string = gets.chomp
+      pos = pos_string.split(',').reverse.map(&:to_i)
+    end
   end
-    
-  # def display
+  # turn logic
+  # end game logic
+  # set to valid moves
+  #
+  
+
+
+# def display
 #     system("clear")
 #     @gameboard.board.each_with_index do |row, y1|
 #       line = ""
