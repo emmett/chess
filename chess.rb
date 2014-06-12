@@ -12,164 +12,129 @@ class Game
     @turn = "white"
     play
   end
-    
-  def display
-    system("clear")
-    @gameboard.board.each_with_index do |row, y1|
-      line = ""
-      row.each_with_index do |tile, x1|
-        contents = @gameboard.square(x1, y1)
-        if x1 == 0 || y1 == 0
-          space = contents
-        elsif contents.empty?
-          space = "☐"
-        else
-          space = contents.to_s
-        end
-        if x1 == @col && y1 == @row 
-          space = " " + space
-        else
-          space = space + " " 
-        end
-        line << space
-      end  
-      puts line
-    end
-    p"#{@row}, #{@col}"
-    p "#{@turn}'s turn"
-    p  "#{@turn} in Check?: #{in_check?(@turn)}"
-  end
-  
-  def cursor 
-    display
-    begin
-      system("stty raw -echo")
-      input = STDIN.getc.chr
-      if input == "\e" then
-        input << STDIN.read_nonblock(3) rescue nil
-        input << STDIN.read_nonblock(2) rescue nil
-      end
-    ensure
-      system("stty -raw echo")
-    end
-    case input
-    when "\e[D"
-      @col == 1 ? @col = 8 : @col -= 1 
-    when "\e[B"
-      @row == 8 ? @row = 1 : @row += 1 
-    when "\e[C"
-      @col == 8 ? @col = 1 : @col += 1 
-    when "\e[A"
-      @row == 1 ? @row = 8 : @row -= 1 
-    when "\r"
-      if @gameboard.square(@col, @row) == []
-        puts "Sorry Empty Square, Press Enter to Continue"
-        gets    
-        play
-      elsif @gameboard.square(@col, @row).color == @turn
-        return "R" 
-        play
-      else
-        puts "Not your turn, Please press enter to continue"
-        gets
-        play
-      end
-    when "\e"
-      return "c"
-    end
-    cursor
-  end
-  
-  
-  def won?
-    # board in check
-    # no valid moves
-    false
-  end
   
   def play
-    until won?
-      action = cursor
-      case action
-      when "R"
-        moves_list = @gameboard.square(@col, @row).moves
-        if moves_list.empty?
-          puts "Sorry no valid moves, Press Enter to Continue"
-          gets
-          play
-        end
-          loc = [0,0]
-        until moves_list.include?([loc[0], loc[1]])
-          display
-          p "Please select your end coordinates"
-          p moves_list
-          loc = gets.chomp
-          loc = loc.split(",").map { |s| s.to_i }
-          p loc
-        end
-        move(@gameboard, @gameboard.square(@col, @row), loc.reverse)
-      when "c"
-        return         
-      end      
-    end
+    loop do
+      @gameboard.display
+      start_pos = get_input("start")
+      end_pos = get_input('end')
+      @gameboard.move(start_pos, end_pos)
+    end 
   end
   
-  def dup_board
-    dup_board = Board.new(true)
-    @board.each_with_index do |row, row_idx|
-      row.each_with_idx do |tile, tile_idx|
-        if tile.is_a? Piece
-          duped_piece = tile.class.new(dup_board, [row_idx, tile_idx], tile.color)
-        end
-      end
-    end
-    dup_board
+  def get_input(type)
+    puts "please enter #{type} (x,y)"
+    pos_string = gets.chomp
+    pos_string.split(',').reverse.map(&:to_i)
   end
-  
-  def valid_moves
-    val_moves = []
-    pieces = get_pieces(@turn)
-    pieces.each do |piece|
-      duplicate = dup_board
-      val_moves << piece.moves.select{|move| is_valid?(duplicate, piece, move)}
-      return true if val_moves.count > 0
-    end
-    false
-  end
-  
-  def is_valid?(board_name, piece, move)
-    move(board_name, piece, move)
-    !in_check?(piece.color)
-  end
-  
-  def move(g_board, piece, loc)
-    dup_piece = piece.class.new(g_board, [@col, @row], piece.color)
-    g_board.board[loc[1]][loc[0]] = dup_piece
-    dup_piece.pos = [loc[1],loc[0]]
-    g_board.board[@row][@col] = []
-    @turn == "black" ? @turn = "white" : @turn = "black"
-  end
-  
-  def get_pieces(color)
-    pieces = @gameboard.board.flatten.compact
-    pieces = pieces.select{ |piece| piece.is_a? Piece }
-    pieces.select{ |piece| piece.color == color }
-  end
-  
-  def king_positions
-    hash = {} 
-    kings = @gameboard.board.flatten.compact.select{|piece| piece.class == King}
-    kings.each do |k|
-      hash[k.color] = k.pos
-    end
-    return hash
-  end  
-  
-  def in_check?(color)
-    color == "black" ? enemy = "white" : enemy = "black"
-    king_pos = king_positions[color]
-    pieces = get_pieces(enemy)
-    return (pieces.any? {|piece| piece.moves.include?(king_pos)})
-  end
+    
+  # def display
+#     system("clear")
+#     @gameboard.board.each_with_index do |row, y1|
+#       line = ""
+#       row.each_with_index do |tile, x1|
+#         contents = @gameboard.square(x1, y1)
+#         if x1 == 0 || y1 == 0
+#           space = contents
+#         elsif contents.empty?
+#           space = "☐"
+#         else
+#           space = contents.to_s
+#         end
+#         if x1 == @col && y1 == @row 
+#           space = " " + space
+#         else
+#           space = space + " " 
+#         end
+#         line << space
+#       end  
+#       puts line
+#     end
+#     # p"#{@row}, #{@col}"
+#     # p "#{@turn}'s turn"
+#     # p  "#{@turn} in Check?: #{in_check?(@turn)}"
+#   end
+#   
+#   def cursor 
+#     display
+#     begin
+#       system("stty raw -echo")
+#       input = STDIN.getc.chr
+#       if input == "\e" then
+#         input << STDIN.read_nonblock(3) rescue nil
+#         input << STDIN.read_nonblock(2) rescue nil
+#       end
+#     ensure
+#       system("stty -raw echo")
+#     end
+#     case input
+#     when "\e[D"
+#       @col == 1 ? @col = 8 : @col -= 1 
+#     when "\e[B"
+#       @row == 8 ? @row = 1 : @row += 1 
+#     when "\e[C"
+#       @col == 8 ? @col = 1 : @col += 1 
+#     when "\e[A"
+#       @row == 1 ? @row = 8 : @row -= 1 
+#     when "\r"
+#       if @gameboard.square(@col, @row) == []
+#         puts "Sorry Empty Square, Press Enter to Continue"
+#         gets    
+#         play
+#       elsif @gameboard.square(@col, @row).color == @turn
+#         return "R" 
+#         play
+#       else
+#         puts "Not your turn, Please press enter to continue"
+#         gets
+#         play
+#       end
+#     when "\e"
+#       return "c"
+#     end
+#     cursor
+#   end
+#   
+#   
+#   def won?
+#     # board in check
+#     # no valid moves
+#     false
+#   end
+#   
+#   def move(g_board, piece, loc)
+#     # !
+#     # dup_piece = piece.class.new(g_board, [@col, @row], piece.color)
+#     # g_board.board[loc[1]][loc[0]] = dup_piece
+#     # dup_piece.pos = [loc[1],loc[0]]
+#     # g_board.board[@row][@col] = []
+#     # @turn == "black" ? @turn = "white" : @turn = "black"
+#   end
+#   
+#   def play
+#     until won?
+#       action = cursor
+#       case action
+#       when "R"
+#         moves_list = @gameboard.square(@col, @row).moves
+#         if moves_list.empty?
+#           puts "Sorry no valid moves, Press Enter to Continue"
+#           gets
+#           play
+#         end
+#           loc = [0,0]
+#         until moves_list.include?([loc[0], loc[1]])
+#           display
+#           p "Please select your end coordinates"
+#           p moves_list
+#           loc = gets.chomp
+#           loc = loc.split(",").map { |s| s.to_i }
+#           p loc
+#         end
+#         move(@gameboard, @gameboard.square(@col, @row), loc.reverse)
+#       when "c"
+#         return         
+#       end      
+#     end
+#   end
 end
-

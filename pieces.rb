@@ -1,5 +1,5 @@
 # -*- coding: UTF-8 -*-
-
+require 'debugger'
 class Piece 
   DIAGONALS = [[1, 1],[1, -1], [-1, 1], [-1, -1]]
   STRAIGHTS = [[1, 0], [0, 1], [-1, 0], [0, -1]]
@@ -22,17 +22,27 @@ class Piece
   end
   
   def open?(loc)
-    on_board?(loc) && @board.board[loc[0]][loc[1]].empty?
+    on_board?(loc) && @board.board[loc[0]][loc[1]].nil?
   end
   
   def capture?(loc)
-    if on_board?(loc) && @board.board[loc[0]][loc[1]].empty?
+    if on_board?(loc) && @board.board[loc[0]][loc[1]].nil?
       return false
     else
       !open?(loc) && on_board?(loc) && @board.board[loc[0]][loc[1]].color != @color 
     end
   end
   
+  def valid_moves
+    self.moves.reject { |move| causes_check? move }
+  end
+  
+  def causes_check? (end_pos)
+    test_board = @board.dup
+    test_board.move!(self.pos, end_pos)
+    test_board.in_check?(self.color)
+  end
+
   def moves
     possible_moves = []
     move_dirs.each do |delta|
@@ -43,7 +53,7 @@ class Piece
       end
       possible_moves << new_loc if capture?(new_loc)
     end
-    return possible_moves
+    possible_moves
   end
 end
 
@@ -71,7 +81,9 @@ class King < Piece
     possible_moves = []
     self.move_dirs.each do |delta|
       new_loc = [@pos[0] + delta[0], @pos[1] + delta[1]]
-      possible_moves << new_loc if on_board?(new_loc) && (open?(new_loc) || capture?(new_loc))
+      if on_board?(new_loc) && (open?(new_loc) || capture?(new_loc))
+        possible_moves << new_loc 
+      end
     end
     return possible_moves
   end
@@ -105,9 +117,11 @@ class Knight < Piece   #also a horse...........☐☐
   
   def moves
     dxdy = (-2..2).to_a.product((-2..2).to_a)
-    dxdy = dxdy.select {|pos| pos[0].abs + pos[1].abs == 3} 
-    possible_positions = dxdy.map {|pos| [pos[0] + @pos[0], pos[1] + @pos[1]]}
-    move_list = possible_positions.select{|tile| open?(tile)}
+    dxdy = dxdy.select { |pos| pos[0].abs + pos[1].abs == 3 } 
+    possible_positions = dxdy.map { |pos| [pos[0] + @pos[0], pos[1] + @pos[1]] }
+    possible_positions.select do |tile| 
+      on_board?(tile) && (open?(tile) || capture?(tile)) 
+    end
   end
 end
 
@@ -129,11 +143,17 @@ class Pawn < Piece
       direction = 1
     end
     
-    possible_moves << [row + (2 * direction), col] if hasnt_moved
-    possible_moves << [row + direction, col]
+    first_step = [row + direction, col]
+    if open? first_step
+      possible_moves << first_step
+      second_step = [row + (2 * direction), col]
+      if open? second_step && hasnt_moved
+        possible_moves << second_step
+      end
+    end
     
     maybe_captures = [[row + direction, col + 1],[row + direction, col - 1]]
     
-    possible_moves += maybe_captures.select{ |pos| capture?(pos) }
+    possible_moves + maybe_captures.select{ |pos| capture?(pos) }
   end
 end
